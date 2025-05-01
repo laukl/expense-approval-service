@@ -1,4 +1,4 @@
-# 2. expense client pattern
+# 2. ExpenseClient pattern
 
 Date: 2025-05-01
 
