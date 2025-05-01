@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release
+
+jobs:
+  release-please:
+    name: Releaser
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        name: Run release-please
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
