@@ -38,10 +38,7 @@ export default class ExpenseClient {
       },
     });
 
-    if (
-      expense.expenseApprovals.length >= expense.approvalsRequired &&
-      expense.expenseRejections.length === 0
-    ) {
+    if (this.isReadyForFinalApproval(expense)) {
       return this.prisma.user.findMany({ where: { role: "FINANCE" } });
     }
 
