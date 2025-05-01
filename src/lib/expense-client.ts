@@ -1,4 +1,5 @@
 import { Expense, Prisma, PrismaClient, User } from "@prisma/client";
+import { ExpenseError, UserError } from "./error";
 
 export default class ExpenseClient {
   private prisma: PrismaClient;
@@ -41,10 +42,7 @@ export default class ExpenseClient {
     if (this.isReadyForFinalApproval(expense)) {
       return this.prisma.user.findMany({ where: { role: "FINANCE" } });
     }
-
-    if (!expense.submitter?.managerId) {
-      throw new Error("Submitter manager not found");
-    }
+    if (!expense.submitter?.managerId) throw new UserError("Manager not found");
 
     const existingApprovers = expense.expenseApprovals.map(
       (approve) => approve.userId,
@@ -56,7 +54,7 @@ export default class ExpenseClient {
       const manager = await this.prisma.user.findUniqueOrThrow({
         where: { id: nextManagerId },
       });
-      if (!manager.managerId) throw new Error("Next manager not found");
+      if (!manager.managerId) throw new UserError("Manager not found");
       approverIds.push(manager.managerId);
     }
 
@@ -70,8 +68,9 @@ export default class ExpenseClient {
   async approve(expenseId: string, userId: string): Promise<Expense | null> {
     const allowedApprovers = await this.nextApprovers(expenseId);
     if (!allowedApprovers.map((allowed) => allowed.id).includes(userId)) {
-      throw new Error(
-        `This user is not allowed to approve expense ${expenseId}`,
+      throw new ExpenseError(
+        expenseId,
+        "User is not allowed to approve this expense",
       );
     }
 
@@ -102,8 +101,9 @@ export default class ExpenseClient {
   async reject(expenseId: string, userId: string): Promise<Expense | null> {
     const allowedApprovers = await this.nextApprovers(expenseId);
     if (!allowedApprovers.map((allowed) => allowed.id).includes(userId)) {
-      throw new Error(
-        `This user is not allowed to reject expense ${expenseId}`,
+      throw new ExpenseError(
+        expenseId,
+        "User is not allowed to approve this expense",
       );
     }
 
