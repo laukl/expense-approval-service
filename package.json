@@ -14,7 +14,8 @@
     "script:next-approvers": "node ./dist/scripts/next-approvers.js",
     "script:approve-expense": "node ./dist/scripts/approve-expense.js",
     "script:reject-expense": "node ./dist/scripts/reject-expense.js",
-    "script:dump-flow": "node ./dist/scripts/dump-flow.js"
+    "script:dump-flow": "node ./dist/scripts/dump-flow.js",
+    "script:get-users": "node ./dist/scripts/get-users.js"
   },
   "author": "",
   "license": "ISC",

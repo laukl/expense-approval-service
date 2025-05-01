@@ -22,6 +22,10 @@ export default class ExpenseClient {
     });
   }
 
+  getUsers(): Promise<User[]> {
+    return this.prisma.user.findMany();
+  }
+
   startApproval(expenseId: string, submitterId: string): Promise<Expense> {
     return this.prisma.expense.update({
       where: { id: expenseId },

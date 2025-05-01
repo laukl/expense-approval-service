@@ -50,6 +50,14 @@ npm run script:get-expenses
 npm run script:get-expenses -- --submitted
 ```
 
+#### Get users
+
+Another useful until/debug script to get a list off the users in the database so you can use it to test the approval flow.
+
+```bash
+npm run script:get-users
+```
+
 #### Start an approval flow
 
 ```bash
