@@ -50,19 +50,28 @@ export default class ExpenseClient {
     return this.prisma.user.findMany({ where: { id: { in: approverIds } } });
   }
 
-  async approve(
-    expenseId: string,
-    approverId: string,
-  ): Promise<Expense | null> {
+  async approve(expenseId: string, userId: string): Promise<Expense | null> {
     const allowedApprovers = await this.nextApprovers(expenseId);
-    if (!allowedApprovers.map((allowed) => allowed.id).includes(approverId)) {
+    if (!allowedApprovers.map((allowed) => allowed.id).includes(userId)) {
       throw new Error(
         `This user is not allowed to approve expense ${expenseId}`,
       );
     }
 
-    await this.prisma.expenseApproval.create({
-      data: { expenseId, userId: approverId },
+    const existingRejection = await this.prisma.expenseRejection.findFirst({
+      where: { expenseId, userId },
+    });
+    if (existingRejection) {
+      // Remove existing rejection for this user
+      await this.prisma.expenseRejection.delete({
+        where: { expenseId_userId: { expenseId, userId } },
+      });
+    }
+
+    await this.prisma.expenseApproval.upsert({
+      where: { expenseId_userId: { expenseId, userId } },
+      create: { expenseId, userId },
+      update: {},
     });
 
     return this.prisma.expense.findUnique({
@@ -71,16 +80,29 @@ export default class ExpenseClient {
     });
   }
 
-  async reject(expenseId: string, rejectorId: string): Promise<Expense | null> {
+  async reject(expenseId: string, userId: string): Promise<Expense | null> {
     const allowedApprovers = await this.nextApprovers(expenseId);
-    if (!allowedApprovers.map((allowed) => allowed.id).includes(rejectorId)) {
+    if (!allowedApprovers.map((allowed) => allowed.id).includes(userId)) {
       throw new Error(
         `This user is not allowed to reject expense ${expenseId}`,
       );
     }
 
-    await this.prisma.expenseRejection.create({
-      data: { expenseId, userId: rejectorId },
+    const existingApproval = await this.prisma.expenseApproval.findFirst({
+      where: { expenseId, userId },
+    });
+
+    if (existingApproval) {
+      // Remove existing approval for this user
+      await this.prisma.expenseApproval.delete({
+        where: { expenseId_userId: { expenseId, userId } },
+      });
+    }
+
+    await this.prisma.expenseRejection.upsert({
+      where: { expenseId_userId: { expenseId, userId } },
+      create: { expenseId, userId },
+      update: {},
     });
 
     return this.prisma.expense.findUnique({
