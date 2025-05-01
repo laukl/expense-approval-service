@@ -20,4 +20,11 @@ export default class ExpenseClient {
       where: { submitterId: { not: null } },
     });
   }
+
+  startApproval(expenseId: string, submitterId: string): Promise<Expense> {
+    return this.prisma.expense.update({
+      where: { id: expenseId },
+      data: { submitterId },
+    });
+  }
 }
