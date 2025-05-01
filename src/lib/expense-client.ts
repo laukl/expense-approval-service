@@ -110,4 +110,33 @@ export default class ExpenseClient {
       include: { expenseRejections: true },
     });
   }
+
+  async dumpFlow(expenseId: string): Promise<void> {
+    const expense = await this.prisma.expense.findUniqueOrThrow({
+      where: { id: expenseId },
+      include: {
+        expenseApprovals: { include: { user: true } },
+        expenseRejections: { include: { user: true } },
+      },
+    });
+
+    console.log(`----- Expense ${expenseId}`);
+    console.log(`Number of approvers required: ${expense.approvalsRequired}`);
+    console.log(`Final approval (Finanace Team): ${expense.finalApproval}`);
+    console.log(`Created: ${expense.createdAt.toLocaleString()}`);
+    console.log(`Updated: ${expense.updatedAt.toLocaleString()}`);
+    console.log("----- Approvers");
+    expense.expenseApprovals.forEach((approve) =>
+      console.log(
+        `${approve.user.email} at ${approve.createdAt.toLocaleString()}`,
+      ),
+    );
+    console.log("----- Rejectors");
+    expense.expenseRejections.forEach((reject) =>
+      console.log(
+        `${reject.user.email} at ${reject.createdAt.toLocaleString()}`,
+      ),
+    );
+    console.log("-----");
+  }
 }

@@ -13,7 +13,8 @@
     "script:start-approval": "node ./dist/scripts/start-approval.js",
     "script:next-approvers": "node ./dist/scripts/next-approvers.js",
     "script:approve-expense": "node ./dist/scripts/approve-expense.js",
-    "script:reject-expense": "node ./dist/scripts/reject-expense.js"
+    "script:reject-expense": "node ./dist/scripts/reject-expense.js",
+    "script:dump-flow": "node ./dist/scripts/dump-flow.js"
   },
   "author": "",
   "license": "ISC",
