@@ -1,4 +1,4 @@
-import { Expense, PrismaClient, User } from "@prisma/client";
+import { Expense, Prisma, PrismaClient, User } from "@prisma/client";
 
 export default class ExpenseClient {
   private prisma: PrismaClient;
@@ -78,6 +78,8 @@ export default class ExpenseClient {
       );
     }
 
+    this.financeUpdateFinal(expenseId, userId, true);
+
     const existingRejection = await this.prisma.expenseRejection.findFirst({
       where: { expenseId, userId },
     });
@@ -107,6 +109,8 @@ export default class ExpenseClient {
         `This user is not allowed to reject expense ${expenseId}`,
       );
     }
+
+    this.financeUpdateFinal(expenseId, userId, false);
 
     const existingApproval = await this.prisma.expenseApproval.findFirst({
       where: { expenseId, userId },
@@ -141,7 +145,10 @@ export default class ExpenseClient {
     });
 
     console.log(`----- Expense ${expenseId}`);
-    console.log(`Number of approvers required: ${expense.approvalsRequired}`);
+    console.log(`Status: ${this.getExpenseStatus(expense)}`);
+    console.log(
+      `Number of approvers required before Finance: ${expense.approvalsRequired}`,
+    );
     console.log(`Final approval (Finance Team): ${expense.finalApproval}`);
     console.log(`Created: ${expense.createdAt.toLocaleString()}`);
     console.log(`Updated: ${expense.updatedAt.toLocaleString()}`);
@@ -158,5 +165,50 @@ export default class ExpenseClient {
       ),
     );
     console.log("-----");
+  }
+
+  private getExpenseStatus(
+    expense: Prisma.ExpenseGetPayload<{
+      include: { expenseApprovals: true; expenseRejections: true };
+    }>,
+  ): string {
+    const approvals = expense.expenseApprovals.length;
+    const rejections = expense.expenseRejections.length;
+    if (this.isReadyForFinalApproval(expense) && expense.finalApproval) {
+      return "APPROVED";
+    }
+
+    if (approvals >= 0 || rejections >= 0) {
+      return "PARTIAL";
+    }
+
+    return "PENDING";
+  }
+
+  private isReadyForFinalApproval(
+    expense: Prisma.ExpenseGetPayload<{
+      include: { expenseRejections: true; expenseApprovals: true };
+    }>,
+  ): boolean {
+    return (
+      expense.expenseApprovals.length >= expense.approvalsRequired &&
+      expense.expenseRejections.length === 0
+    );
+  }
+
+  private async financeUpdateFinal(
+    expenseId: string,
+    userId: string,
+    finalApproval: boolean,
+  ) {
+    const financeUser = await this.prisma.user.findUnique({
+      where: { id: userId, role: "FINANCE" },
+    });
+    if (!financeUser) return;
+
+    await this.prisma.expense.update({
+      where: { id: expenseId },
+      data: { finalApproval },
+    });
   }
 }
