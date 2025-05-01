@@ -49,4 +49,25 @@ export default class ExpenseClient {
 
     return this.prisma.user.findMany({ where: { id: { in: approverIds } } });
   }
+
+  async approve(
+    expenseId: string,
+    approverId: string,
+  ): Promise<Expense | null> {
+    const allowedApprovers = await this.nextApprovers(expenseId);
+    if (!allowedApprovers.map((allowed) => allowed.id).includes(approverId)) {
+      throw new Error(
+        `This user is not allowed to approve expense ${expenseId}`,
+      );
+    }
+
+    await this.prisma.expenseApproval.create({
+      data: { expenseId, userId: approverId },
+    });
+
+    return this.prisma.expense.findUnique({
+      where: { id: expenseId },
+      include: { expenseApprovals: true },
+    });
+  }
 }
