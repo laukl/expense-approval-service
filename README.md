@@ -28,6 +28,14 @@ It follows the following pattern:
 npm run script:<name> -- <arg_1> <arg_2>
 ```
 
+#### Seed the database (Optional)
+
+This repo has a commited `prisma/dev.db` as an example database, for whatever reason that this is empty or there are no users, you can run the below:
+
+```bash
+npm run script:seed
+```
+
 #### Create an expense
 
 ```bash
