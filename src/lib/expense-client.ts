@@ -54,8 +54,9 @@ export default class ExpenseClient {
       const manager = await this.prisma.user.findUniqueOrThrow({
         where: { id: nextManagerId },
       });
-      if (!manager.managerId) throw new UserError("Manager not found");
+      if (!manager.managerId) continue;
       approverIds.push(manager.managerId);
+      nextManagerId = manager.managerId;
     }
 
     return this.prisma.user.findMany({
@@ -175,7 +176,7 @@ export default class ExpenseClient {
     if (this.isReadyForFinalApproval(expense) && expense.finalApproval) {
       return "APPROVED";
     }
-    if (approvals >= 0 || rejections >= 0) {
+    if (approvals > 0 || rejections > 0) {
       return "PARTIAL";
     }
     return "PENDING";
