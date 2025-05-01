@@ -187,10 +187,7 @@ export default class ExpenseClient {
       include: { expenseRejections: true; expenseApprovals: true };
     }>,
   ): boolean {
-    return (
-      expense.expenseApprovals.length >= expense.approvalsRequired &&
-      expense.expenseRejections.length === 0
-    );
+    return expense.expenseApprovals.length >= expense.approvalsRequired;
   }
 
   private async financeUpdateFinal(
