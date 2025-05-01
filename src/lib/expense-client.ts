@@ -171,14 +171,13 @@ export default class ExpenseClient {
   ): string {
     const approvals = expense.expenseApprovals.length;
     const rejections = expense.expenseRejections.length;
+
     if (this.isReadyForFinalApproval(expense) && expense.finalApproval) {
       return "APPROVED";
     }
-
     if (approvals >= 0 || rejections >= 0) {
       return "PARTIAL";
     }
-
     return "PENDING";
   }
 
