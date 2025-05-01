@@ -10,7 +10,8 @@
     "script:seed": "node ./dist/scripts/seed.js",
     "script:create-expense": "node ./dist/scripts/create-expense.js",
     "script:get-expenses": "node ./dist/scripts/get-expenses.js",
-    "script:start-approval": "node ./dist/scripts/start-approval.js"
+    "script:start-approval": "node ./dist/scripts/start-approval.js",
+    "script:next-approvers": "node ./dist/scripts/next-approvers.js"
   },
   "author": "",
   "license": "ISC",

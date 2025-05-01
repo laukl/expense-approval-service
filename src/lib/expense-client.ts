@@ -1,4 +1,4 @@
-import { Expense, PrismaClient } from "@prisma/client";
+import { Expense, PrismaClient, User } from "@prisma/client";
 
 export default class ExpenseClient {
   private prisma: PrismaClient;
@@ -26,5 +26,27 @@ export default class ExpenseClient {
       where: { id: expenseId },
       data: { submitterId },
     });
+  }
+
+  async nextApprovers(expenseId: string): Promise<User[]> {
+    const expense = await this.prisma.expense.findUniqueOrThrow({
+      where: { id: expenseId },
+      include: { submitter: { include: { manager: true } } },
+    });
+    if (!expense.submitter?.managerId) {
+      throw new Error("Submitter manager not found");
+    }
+
+    let nextManagerId = expense.submitter.managerId;
+    const approverIds: string[] = [nextManagerId];
+    for (let i = 1; i < expense.approvalsRequired; i++) {
+      const manager = await this.prisma.user.findUniqueOrThrow({
+        where: { id: nextManagerId },
+      });
+      if (!manager.managerId) throw new Error("Next manager not found");
+      approverIds.push(manager.managerId);
+    }
+
+    return this.prisma.user.findMany({ where: { id: { in: approverIds } } });
   }
 }
