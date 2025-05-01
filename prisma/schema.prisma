@@ -5,13 +5,14 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  // TODO: Use for production
   // url      = env("DATABASE_URL")
   url      = "file:./dev.db"
 }
 
 model User {
   id                String             @id @unique @default(cuid())
-  email             String
+  email             String             @unique
   role              String
   managerId         String?
   manager           User?              @relation(name: "ManagerEmployee", fields: [managerId], references: [id])
@@ -28,7 +29,7 @@ model Expense {
   approvalsRequired Int                @default(1)
   finalApproval     Boolean            @default(false)
   submitterId       String?
-  submitter         User?              @relation(fields: [submitterId], references: [id])
+  submitter         User?              @relation(fields: [submitterId], references: [id], onDelete: Cascade)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   expenseApprovals  ExpenseApproval[]
@@ -38,9 +39,9 @@ model Expense {
 model ExpenseApproval {
   id        String   @id @unique @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenseId String
-  expense   Expense  @relation(fields: [expenseId], references: [id])
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -48,9 +49,9 @@ model ExpenseApproval {
 model ExpenseRejection {
   id        String   @id @unique @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenseId String
-  expense   Expense  @relation(fields: [expenseId], references: [id])
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
