@@ -1,0 +1,56 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  // url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                String             @id @unique @default(cuid())
+  email             String
+  role              String
+  managerId         String?
+  manager           User?              @relation(name: "ManagerEmployee", fields: [managerId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  expenseApprovals  ExpenseApproval[]
+  expenseRejections ExpenseRejection[]
+  expenses          Expense[]
+  employees         User[]             @relation("ManagerEmployee")
+}
+
+model Expense {
+  id                String             @id @unique @default(cuid())
+  approvalsRequired Int                @default(1)
+  finalApproval     Boolean            @default(false)
+  submitterId       String?
+  submitter         User?              @relation(fields: [submitterId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  expenseApprovals  ExpenseApproval[]
+  expenseRejections ExpenseRejection[]
+}
+
+model ExpenseApproval {
+  id        String   @id @unique @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expenseId String
+  expense   Expense  @relation(fields: [expenseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExpenseRejection {
+  id        String   @id @unique @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expenseId String
+  expense   Expense  @relation(fields: [expenseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
