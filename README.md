@@ -20,7 +20,7 @@ npm run build
 
 ### 3. Run scripts
 
-I've created some `npm` scripts to make running each part of the service easier.
+I've created some `npm` scripts to make running each part of the service easier. There is also an [example flow here](./docs/example-flow.md).
 
 It follows the following pattern:
 
