@@ -70,4 +70,22 @@ export default class ExpenseClient {
       include: { expenseApprovals: true },
     });
   }
+
+  async reject(expenseId: string, rejectorId: string): Promise<Expense | null> {
+    const allowedApprovers = await this.nextApprovers(expenseId);
+    if (!allowedApprovers.map((allowed) => allowed.id).includes(rejectorId)) {
+      throw new Error(
+        `This user is not allowed to reject expense ${expenseId}`,
+      );
+    }
+
+    await this.prisma.expenseRejection.create({
+      data: { expenseId, userId: rejectorId },
+    });
+
+    return this.prisma.expense.findUnique({
+      where: { id: expenseId },
+      include: { expenseRejections: true },
+    });
+  }
 }

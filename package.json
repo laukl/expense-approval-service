@@ -12,7 +12,8 @@
     "script:get-expenses": "node ./dist/scripts/get-expenses.js",
     "script:start-approval": "node ./dist/scripts/start-approval.js",
     "script:next-approvers": "node ./dist/scripts/next-approvers.js",
-    "script:approve-expense": "node ./dist/scripts/approve-expense.js"
+    "script:approve-expense": "node ./dist/scripts/approve-expense.js",
+    "script:reject-expense": "node ./dist/scripts/reject-expense.js"
   },
   "author": "",
   "license": "ISC",
