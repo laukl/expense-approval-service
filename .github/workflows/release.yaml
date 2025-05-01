@@ -8,6 +8,9 @@ on:
 concurrency:
   group: release
 
+permissions:
+  pull-requests: write
+
 jobs:
   release-please:
     name: Releaser
