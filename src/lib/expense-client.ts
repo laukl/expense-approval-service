@@ -31,11 +31,27 @@ export default class ExpenseClient {
   async nextApprovers(expenseId: string): Promise<User[]> {
     const expense = await this.prisma.expense.findUniqueOrThrow({
       where: { id: expenseId },
-      include: { submitter: { include: { manager: true } } },
+      include: {
+        submitter: { include: { manager: true } },
+        expenseRejections: true,
+        expenseApprovals: true,
+      },
     });
+
+    if (
+      expense.expenseApprovals.length >= expense.approvalsRequired &&
+      expense.expenseRejections.length === 0
+    ) {
+      return this.prisma.user.findMany({ where: { role: "FINANCE" } });
+    }
+
     if (!expense.submitter?.managerId) {
       throw new Error("Submitter manager not found");
     }
+
+    const existingApprovers = expense.expenseApprovals.map(
+      (approve) => approve.userId,
+    );
 
     let nextManagerId = expense.submitter.managerId;
     const approverIds: string[] = [nextManagerId];
@@ -47,7 +63,11 @@ export default class ExpenseClient {
       approverIds.push(manager.managerId);
     }
 
-    return this.prisma.user.findMany({ where: { id: { in: approverIds } } });
+    return this.prisma.user.findMany({
+      where: {
+        id: { in: approverIds.filter((id) => !existingApprovers.includes(id)) },
+      },
+    });
   }
 
   async approve(expenseId: string, userId: string): Promise<Expense | null> {
@@ -122,7 +142,7 @@ export default class ExpenseClient {
 
     console.log(`----- Expense ${expenseId}`);
     console.log(`Number of approvers required: ${expense.approvalsRequired}`);
-    console.log(`Final approval (Finanace Team): ${expense.finalApproval}`);
+    console.log(`Final approval (Finance Team): ${expense.finalApproval}`);
     console.log(`Created: ${expense.createdAt.toLocaleString()}`);
     console.log(`Updated: ${expense.updatedAt.toLocaleString()}`);
     console.log("----- Approvers");
