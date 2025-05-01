@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "expense-approval-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prisma": "^6.7.0",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "zod": "^3.24.3"
+  }
+}
