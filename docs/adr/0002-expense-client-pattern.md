@@ -49,6 +49,6 @@ Add in additional logic to check for if the user has an existing approval/reject
 
 **Not enough managers**
 
-If the database only contains at most 2 tiers of managers, e.g. your boss' boss, and if you create an expese with `approvalsRequired` being more than `2`, there will not be enough managers to complete the flow.
+If the database only contains at most 2 tiers of managers, e.g. your boss' boss, and if you create an expense with `approvalsRequired` being more than `2`, there will not be enough managers to complete the flow.
 
 New logic can be added to validate this during expense creation or when starting an approval flow. If there's not enough managers, the interface can throw an error.
